@@ -9,6 +9,12 @@ const bonusMap = {
     sf: ['sf','dark'],
     dark: ['dark']
 };
+const extraBonus = {
+    milk: 'sf',
+    white: 'sf',
+    sf: 'dark',
+    dark: null
+}
 
 function calculateIfProceed(wrapper,wrapper_needed)
 {
@@ -28,6 +34,35 @@ app.get('/', (req, res) => {
         dark: 0
     };
 
+    ans[type] = Math.floor(cash/price);
+    var origin = Math.floor(cash/price);
+    if(ans[type] > 0 && wrapper_needed <= 1)
+    {
+        res.send("Infinite amount of candy is possible");
+    }
+
+    ans[type] = ans[type] + Math.floor((ans[type]-1)/(wrapper_needed-1));
+    while (extraBonus[type])
+    {
+        var gain = ans[type] - origin;
+        if(gain < 1) break;
+        ans[extraBonus[type]] = gain;
+        origin = gain;
+        type = extraBonus[type];
+        ans[type] = ans[type] + Math.floor((ans[type]-1)/(wrapper_needed-1));
+    }
+
+    res.send(ans);
+});
+
+app.get('/stable', (req, res) => {
+    var cash = 6569, price = 69, wrapper_needed = 2, type = "white";
+    var ans = {
+        milk: 0,
+        white: 0,
+        sf: 0,
+        dark: 0
+    };
     var wrapper = {
         milk: 0,
         white: 0,
