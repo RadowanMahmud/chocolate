@@ -2,6 +2,7 @@ const express = require('express');
 const {createReadStream} = require('fs');
 const app = express();
 const PORT = 3000;
+const fs = require('fs');
 
 const bonusMap = {
     milk: ['milk', 'sf'],
@@ -103,14 +104,25 @@ function cleanOrderData(orders) {
     orders = orders.filter(x => x.length === 4);
     return orders;
 }
-
+function writeOutputToFile(ans){
+    fs.writeFile("output/redemption.csv", ans, function(err) {
+        if(err) {
+            console.log(err);
+            return err;
+        }
+    });
+}
 function getRedemeptionFromCSVOrders(orders){
-    let result = [];
+    let result = [], ans='';
     for(let order of orders){
         var cash = Number(order[0]), price = Number(order[1]), wrapper_needed = Number(order[2]), type = order[3];
         result.push(offerRedemtionRateInOofN(cash, price, wrapper_needed, type));
     }
-    return result;
+    for(let r of result){
+        ans = ans + "milk "+r["milk"]+", "+"dark "+r["dark"]+", "+"white "+r["white"]+", "+"sugar free "+r["sf"]+"\n";
+    }
+    writeOutputToFile(ans);
+    return ans;
 }
 
 app.get('/csv', (req, res) => {
