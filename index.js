@@ -96,6 +96,9 @@ function offerRedemtionRateInOofONE(cash, price, wrapper_needed, type) {
 app.post('/', (req, res) => {
     res.send(offerRedemtionRateInOofONE(req.body.cash, req.body.price, req.body.wrapper_needed, req.body.type));
 });
+app.post('/stable', (req, res) => {
+    res.send(offerRedemtionRateInOofN(req.body.cash, req.body.price, req.body.wrapper_needed, req.body.type));
+});
 
 app.get('/', (req, res) => {
     var cash = 6, price = 2, wrapper_needed = 2, type = "white";
