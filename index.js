@@ -2,7 +2,11 @@ const express = require('express');
 const {createReadStream} = require('fs');
 const app = express();
 const PORT = 3000;
+var bodyParser = require('body-parser')
 const fs = require('fs');
+app.use(bodyParser.urlencoded());
+app.use(bodyParser.json());
+
 const bonusMap = {
     milk: ['milk', 'sf'],
     white: ['white', 'sf'],
@@ -89,13 +93,11 @@ function offerRedemtionRateInOofONE(cash, price, wrapper_needed, type) {
     return ans;
 }
 
-app.get('/', (req, res) => {
-    console.log("call coming here")
-    var cash = 6569, price = 69, wrapper_needed = 2, type = "white";
-    res.send(offerRedemtionRateInOofONE(cash, price, wrapper_needed, type));
+app.post('/', (req, res) => {
+    res.send(offerRedemtionRateInOofONE(req.body.cash, req.body.price, req.body.wrapper_needed, req.body.type));
 });
 
-app.get('/stable', (req, res) => {
+app.get('/', (req, res) => {
     var cash = 6, price = 2, wrapper_needed = 2, type = "white";
     res.send(offerRedemtionRateInOofN(cash, price, wrapper_needed, type));
 });
