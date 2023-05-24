@@ -45,7 +45,7 @@ function offerRedemtionRateInOofN(cash, price, wrapper_needed, type) {
 
     ans[type] = Math.floor(cash / price);
     if (!isOfferValid(cash, price, wrapper_needed)) {
-        res.send("Infinite amount of candy is possible");
+        return "Infinite amount of candy is possible";
     }
     wrapper[type] = Math.floor(cash / price);
     if (wrapper[type] >= wrapper_needed) {
@@ -75,7 +75,7 @@ function offerRedemtionRateInOofONE(cash, price, wrapper_needed, type) {
     ans[type] = Math.floor(cash / price);
     var origin = Math.floor(cash / price);
     if (!isOfferValid(cash, price, wrapper_needed)) {
-        res.send("Infinite amount of candy is possible");
+        return "Infinite amount of candy is possible";
     }
 
     ans[type] = ans[type] + Math.floor((ans[type] - 1) / (wrapper_needed - 1));
