@@ -3,7 +3,6 @@ const {createReadStream} = require('fs');
 const app = express();
 const PORT = 3000;
 const fs = require('fs');
-
 const bonusMap = {
     milk: ['milk', 'sf'],
     white: ['white', 'sf'],
@@ -91,6 +90,7 @@ function offerRedemtionRateInOofONE(cash, price, wrapper_needed, type) {
 }
 
 app.get('/', (req, res) => {
+    console.log("call coming here")
     var cash = 6569, price = 69, wrapper_needed = 2, type = "white";
     res.send(offerRedemtionRateInOofONE(cash, price, wrapper_needed, type));
 });
