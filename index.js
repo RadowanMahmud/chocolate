@@ -1,12 +1,12 @@
 const express = require('express');
-
+const {createReadStream} = require('fs');
 const app = express();
 const PORT = 3000;
 
 const bonusMap = {
-    milk: ['milk','sf'],
+    milk: ['milk', 'sf'],
     white: ['white', 'sf'],
-    sf: ['sf','dark'],
+    sf: ['sf', 'dark'],
     dark: ['dark']
 };
 const extraBonus = {
@@ -16,47 +16,19 @@ const extraBonus = {
     dark: null
 }
 
-function calculateIfProceed(wrapper,wrapper_needed)
-{
-    for(let w in wrapper)
-    {
-        if(wrapper[w] >= wrapper_needed) return w;
+function calculateIfProceed(wrapper, wrapper_needed) {
+    for (let w in wrapper) {
+        if (wrapper[w] >= wrapper_needed) return w;
     }
     return null;
 }
 
-app.get('/', (req, res) => {
-    var cash = 6569, price = 69, wrapper_needed = 2, type = "white";
-    var ans = {
-        milk: 0,
-        white: 0,
-        sf: 0,
-        dark: 0
-    };
+function isOfferValid(cash, price, wrapper_needed) {
+    if (Math.floor(cash / price) > 0 && wrapper_needed <= 1) return false;
+    else return true;
+}
 
-    ans[type] = Math.floor(cash/price);
-    var origin = Math.floor(cash/price);
-    if(ans[type] > 0 && wrapper_needed <= 1)
-    {
-        res.send("Infinite amount of candy is possible");
-    }
-
-    ans[type] = ans[type] + Math.floor((ans[type]-1)/(wrapper_needed-1));
-    while (extraBonus[type])
-    {
-        var gain = ans[type] - origin;
-        if(gain < 1) break;
-        ans[extraBonus[type]] = gain;
-        origin = gain;
-        type = extraBonus[type];
-        ans[type] = ans[type] + Math.floor((ans[type]-1)/(wrapper_needed-1));
-    }
-
-    res.send(ans);
-});
-
-app.get('/stable', (req, res) => {
-    var cash = 6569, price = 69, wrapper_needed = 2, type = "white";
+function offerRedemtionRateInOofN(cash, price, wrapper_needed, type) {
     var ans = {
         milk: 0,
         white: 0,
@@ -70,30 +42,107 @@ app.get('/stable', (req, res) => {
         dark: 0
     };
 
-    ans[type] = Math.floor(cash/price);
-    if(ans[type] > 0 && wrapper_needed <= 1)
-    {
+    ans[type] = Math.floor(cash / price);
+    if (!isOfferValid(cash, price, wrapper_needed)) {
         res.send("Infinite amount of candy is possible");
     }
-    wrapper[type] = Math.floor(cash/price);
-    if(wrapper[type] >= wrapper_needed)
-    {
-        let temp = calculateIfProceed(wrapper,wrapper_needed);
-        while (temp !== null)
-        {
-            let newChoc = Math.floor(wrapper[temp]/wrapper_needed);
-            for(let i of bonusMap[temp]){
+    wrapper[type] = Math.floor(cash / price);
+    if (wrapper[type] >= wrapper_needed) {
+        let temp = calculateIfProceed(wrapper, wrapper_needed);
+        while (temp !== null) {
+            let newChoc = Math.floor(wrapper[temp] / wrapper_needed);
+            for (let i of bonusMap[temp]) {
                 ans[i] = Math.floor(ans[i] + newChoc);
-                if(wrapper[temp] >= wrapper[i]) wrapper[i] = Math.floor(wrapper[i]%wrapper_needed +newChoc);
-                else  wrapper[i] =  wrapper[i] + newChoc;
+                if (wrapper[temp] >= wrapper[i]) wrapper[i] = Math.floor(wrapper[i] % wrapper_needed + newChoc);
+                else wrapper[i] = wrapper[i] + newChoc;
             }
-            temp = calculateIfProceed(wrapper,wrapper_needed);
+            temp = calculateIfProceed(wrapper, wrapper_needed);
         }
 
     }
-    res.send(ans);
+    return ans;
+}
+
+function offerRedemtionRateInOofONE(cash, price, wrapper_needed, type) {
+    var ans = {
+        milk: 0,
+        white: 0,
+        sf: 0,
+        dark: 0
+    };
+
+    ans[type] = Math.floor(cash / price);
+    var origin = Math.floor(cash / price);
+    if (!isOfferValid(cash, price, wrapper_needed)) {
+        res.send("Infinite amount of candy is possible");
+    }
+
+    ans[type] = ans[type] + Math.floor((ans[type] - 1) / (wrapper_needed - 1));
+    while (extraBonus[type]) {
+        var gain = ans[type] - origin;
+        if (gain < 1) break;
+        ans[extraBonus[type]] = gain;
+        origin = gain;
+        type = extraBonus[type];
+        ans[type] = ans[type] + Math.floor((ans[type] - 1) / (wrapper_needed - 1));
+    }
+    return ans;
+}
+
+app.get('/', (req, res) => {
+    var cash = 6569, price = 69, wrapper_needed = 2, type = "white";
+    res.send(offerRedemtionRateInOofONE(cash, price, wrapper_needed, type));
+});
+
+app.get('/stable', (req, res) => {
+    var cash = 6, price = 2, wrapper_needed = 2, type = "white";
+    res.send(offerRedemtionRateInOofN(cash, price, wrapper_needed, type));
+});
+
+function cleanOrderData(orders) {
+    orders = orders.filter(x => x.length === 4);
+    return orders;
+}
+
+function getRedemeptionFromCSVOrders(orders){
+    let result = [];
+    for(let order of orders){
+        var cash = Number(order[0]), price = Number(order[1]), wrapper_needed = Number(order[2]), type = order[3];
+        result.push(offerRedemtionRateInOofN(cash, price, wrapper_needed, type));
+    }
+    return result;
+}
+
+app.get('/csv', (req, res) => {
+    const data = [];
+    var header = [], orders = [];
+    (() => {
+        const readStream = createReadStream('input/orders.csv', {
+            encoding: 'utf8',
+        });
+        readStream.on('data', (chunk) => {
+            data.push(
+                ...chunk.split(/\r\n/).map((line) => {
+                    return line.split(',');
+                })
+            );
+        });
+        readStream.on('error', (err) => {
+            console.log(err);
+        });
+
+        readStream.on('end', () => {
+            header = data[0];
+            if (header.length !== 4) {
+                res.send("Data missing. 4 Headers are esential and which are CASH, PRICE, WRAPPER NEEDED, Type ").status(403);
+            }
+            orders = data.slice(1);
+            orders = cleanOrderData(orders);
+            res.send(getRedemeptionFromCSVOrders(orders));
+        });
+    })();
 });
 
 app.listen(PORT, (error) => {
-        if (!error) console.log("Server is listening on port " + PORT)
+    if (!error) console.log("Server is listening on port " + PORT)
 });
