@@ -21,7 +21,7 @@ exports.getRedemeptionFromCSVOrders = function (orders) {
         result.push(logics.offerRedemtionRateInOofN(cash, price, wrapper_needed, type));
     }
     for (let r of result) {
-        ans = ans + "milk " + r["milk"] + ", " + "dark " + r["dark"] + ", " + "white " + r["white"] + ", " + "sugar free " + r["sf"] + "\n";
+        ans = ans + "milk " + r["milk"] + ", " + "dark " + r["dark"] + ", " + "white " + r["white"] + ", " + "sugar free " + r["sugar_free"] + "\n";
     }
     return ans;
 }

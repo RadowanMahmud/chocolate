@@ -1,12 +1,12 @@
 exports.bonusMap = {
-    milk: ['milk', 'sf'],
-    white: ['white', 'sf'],
-    sf: ['sf', 'dark'],
+    milk: ['milk', 'sugar_free'],
+    white: ['white', 'sugar_free'],
+    sugar_free: ['sugar_free', 'dark'],
     dark: ['dark']
 };
 exports.extraBonus = {
-    milk: 'sf',
-    white: 'sf',
-    sf: 'dark',
+    milk: 'sugar_free',
+    white: 'sugar_free',
+    sugar_free: 'dark',
     dark: null
 };

@@ -1,6 +1,6 @@
 const axios = require("axios");
 const {expect} = require("chai");
-var type = ["milk", "white", "sf", "dark"];
+var type = ["milk", "white", "sugar_free", "dark"];
 const logics = require("../src/logicalfunctions");
 const cases = require("./case");
 
@@ -53,3 +53,18 @@ for(let c of cases.case){
         })
     })
 }
+describe("Comparing both solutions with infinite loop case", async () => {
+    it("infinite loop case", async () => {
+        var body = {
+            "cash": 65,
+            "price": 1,
+            "wrapper_needed": 1,
+            "type": type[Math.floor(Math.random() / 4)]
+        }
+        const res = await axios.post("http://localhost:3000/", body);
+        const resStable = await axios.post("http://localhost:3000/stable", body);
+        for (let t of type) {
+            expect(res.data[t]).equal(resStable.data[t]);
+        }
+    })
+})

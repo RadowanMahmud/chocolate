@@ -6,13 +6,13 @@ exports.offerRedemtionRateInOofN = function (cash, price, wrapper_needed, type) 
     var ans = {
         milk: 0,
         white: 0,
-        sf: 0,
+        sugar_free: 0,
         dark: 0
     };
     var wrapper = {
         milk: 0,
         white: 0,
-        sf: 0,
+        sugar_free: 0,
         dark: 0
     };
 
@@ -44,7 +44,7 @@ exports.offerRedemtionRateInOofONE = function (cash, price, wrapper_needed, type
     var ans = {
         milk: 0,
         white: 0,
-        sf: 0,
+        sugar_free: 0,
         dark: 0
     };
 
